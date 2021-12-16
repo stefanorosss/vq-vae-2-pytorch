@@ -190,9 +190,9 @@ class VQVAE(nn.Module):
             embed_dim + embed_dim,
             in_channel,
             channel,
-            n_res_block,
+            n_res_block//2,
             n_res_channel,
-            stride=4,
+            stride=2,
         )
 
     def forward(self, input):
