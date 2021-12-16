@@ -171,29 +171,28 @@ class VQVAE(nn.Module):
         embed_dim=64,
         n_embed=512,
         decay=0.99,
-        res = 512,
     ):
         super().__init__()
-        self.res_ratio = 512//res
-        self.enc_b = Encoder(in_channel, channel//self.res_ratio, n_res_block, n_res_channel//self.res_ratio, stride=4)
-        self.enc_t = Encoder(channel//self.res_ratio, channel//self.res_ratio, n_res_block, n_res_channel//self.res_ratio, stride=2)
-        self.quantize_conv_t = nn.Conv2d(channel//self.res_ratio, embed_dim//self.res_ratio, 1)
-        self.quantize_t = Quantize(embed_dim//self.res_ratio, n_embed//self.res_ratio)
+
+        self.enc_b = Encoder(in_channel, channel, n_res_block, n_res_channel, stride=4)
+        self.enc_t = Encoder(channel, channel, n_res_block, n_res_channel, stride=2)
+        self.quantize_conv_t = nn.Conv2d(channel, embed_dim, 1)
+        self.quantize_t = Quantize(embed_dim, n_embed)
         self.dec_t = Decoder(
-            embed_dim//self.res_ratio, embed_dim//self.res_ratio, channel//self.res_ratio, n_res_block, n_res_channel//self.res_ratio, stride=2
+            embed_dim, embed_dim, channel, n_res_block, n_res_channel, stride=2
         )
-        self.quantize_conv_b = nn.Conv2d(embed_dim//self.res_ratio + channel//self.res_ratio, embed_dim//self.res_ratio, 1)
-        self.quantize_b = Quantize(embed_dim//self.res_ratio, n_embed//self.res_ratio)
+        self.quantize_conv_b = nn.Conv2d(embed_dim + channel, embed_dim, 1)
+        self.quantize_b = Quantize(embed_dim, n_embed)
         self.upsample_t = nn.ConvTranspose2d(
-            embed_dim//self.res_ratio, embed_dim//self.res_ratio, 4, stride=2, padding=1
+            embed_dim, embed_dim, 4, stride=2, padding=1
         )
         self.dec = Decoder(
-            embed_dim//self.res_ratio + embed_dim//self.res_ratio,
-            in_channel//self.res_ratio,
-            channel//self.res_ratio,
-            n_res_block//2,
-            n_res_channel//self.res_ratio,
-            stride=2,
+            embed_dim + embed_dim,
+            in_channel,
+            channel,
+            n_res_block,
+            n_res_channel,
+            stride=4,
         )
 
     def forward(self, input):
